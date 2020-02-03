@@ -13,7 +13,7 @@ compute_lags <- function(Y, q)                                                #f
     YLAG[ , (n * i + 1):(n * (i + 1))] <- Y[(q - i + 1):(p - i), ]
   }
 
-  Y <- YLAG[,1:n]
-  YLAG <- YLAG[,(n + 1):dim(YLAG)[2]]
+  Y <- data.matrix(YLAG[,1:n])
+  YLAG <- data.matrix(YLAG[,(n + 1):dim(YLAG)[2]])
   return(list(Y = Y, YLAG = YLAG, myDates = myDates))
 }

@@ -7,13 +7,15 @@ matrix_conformation <- function(Y, q, X, trend, intercept)
   Y <- lY$Y                                                                     #get the matching dependent matrix
   YLAG <- lY$YLAG                                                               #get the lagged dependent variables matrix
   myDates <- lY$myDates                                                         #get the original matching rowname vector (of dates)
-
+  
   p <- dim(Y)[1]                                                                #length of the matrix
   nEq <- dim(Y)[2]                                                              #number of equations of the vAR
 
+  print(p)
   In <- diag(nEq)                                                               #identity matrix of the number of equations of the VAR
 
   Gt <- as.matrix(cbind(rep(1, p), YLAG))                                       #create a unique matrix transpose of G with one intercept and autoregressive terms
+  
   n <- dim(Gt)[2]                                                               #incremental number of regressors
 
   if(!is.null(X))                                                               #if additional covariates matrix is passed as argument
@@ -33,8 +35,6 @@ matrix_conformation <- function(Y, q, X, trend, intercept)
     n <- dim(Gt)[2]                                                             #increment the total number of regressors
   }
 
-  G <- t(Gt)                                                                    #transpose Gt to get G as in BLS
-
   if(intercept)                                                                 #if only the intercept is allowed to break
   {
     s <- t(data.matrix(c(rep(0, n))))                                           #create the selection vector
@@ -48,10 +48,10 @@ matrix_conformation <- function(Y, q, X, trend, intercept)
     S <- diag(r)                                                                #identity matrix of the size of the test is the selection matrix
   }
 
+  G <- t(Gt)                                                                    #transpose Gt to get G as in BLS
+
   Yex <- data.matrix(c(t(Y)))                                                   #Expend and vectorize Y
+  
   Gex <- kronecker(t(G), In)                                                    #Expend G
-
-  GexB <- Gex %*% t(S)                                                         #Second Gex of size selected by S for the break tested
-
-  return(list(Yex = Yex, Gex = Gex, GexB = GexB, p = p, G = G, S = S, myDates = myDates, Y = Y, nEq = nEq))
+  return(list(Yex = Yex, Gex = Gex, p = p, G = G, S = S, myDates = myDates, Y = Y, nEq = nEq))
 }

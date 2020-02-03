@@ -5,7 +5,7 @@ compute_simul <- function(n, p, intensity = 1, whenbreak = 0.35)
   prebreakN <- round(n * whenbreak)
   postbreakN <- round(n * (1 - whenbreak))
   
-  Y <- rbind(matrix(rnorm(prebreakN * p) + 5, nrow = prebreakN, ncol = p), matrix(rnorm(postbreakN * p) + 5 + intensity, nrow = postbreakN, ncol = p))
+  Y <- rbind(matrix(rnorm(prebreakN * p) + 0, nrow = prebreakN, ncol = p), matrix(rnorm(postbreakN * p) + 0 + intensity, nrow = postbreakN, ncol = p))
   startDate <- as.Date("22.01.2020", format = "%d.%m.%Y")                                            #date when I wrote this code
   
   simulDates <- 0:(n - 1) + startDate
@@ -16,4 +16,4 @@ compute_simul <- function(n, p, intensity = 1, whenbreak = 0.35)
   
   print(head(Y))
   return(Y)
-}
+} 

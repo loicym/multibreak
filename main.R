@@ -16,16 +16,17 @@ main <- function(Y                                      #Y is a matrix or vector
   myVars <- colnames(Y)                                                   #get the variable names
 
   qOpt <- compute_aicbic(Y, qMax, X, trend, intercept)                    #return the AIC and BIC criteria for lags from 1 to 6
+  
+  
   print(qOpt)                                                             #print the matrix of AIC and BIC for each lags
 
   q <- as.numeric(which.max(qOpt[aicbicMode,]))                           #choose the lag q according to the max AIC
-  print(paste0("lag with the maximum ", aicbicMode, " is: ",q))
+  print(paste0("lag with the maximum ", aicbicMode, " is: ", q))
 
   lconf <- matrix_conformation(Y, q, X, trend, intercept)                 #create a list of conform objects for the estimation
 
   Yex <- lconf$Yex                                                        #get the conformed (expanded) Yex matrix (for the system, in vector form)
   Gex <- lconf$Gex                                                        #get the conformed G matrix of regressors for the system
-  GexB <- lconf$GexB                                                      #get the conformed G matrix with the 0 / original values at the break
   p <- lconf$p                                                            #final number of observations
   G <- lconf$G                                                            #original matrix of regressors
   S <- lconf$S                                                            #selection matrix
@@ -33,8 +34,7 @@ main <- function(Y                                      #Y is a matrix or vector
   nEq <- lconf$nEq                                                        #original number of equations / dependent variables
   myDates <- lconf$myDates                                                #matching dates
 
-
-  print(paste0("The number of equations in the system is: ",nEq))
+  print(paste0("The number of equations in the system is: ", nEq))
 
   fstat <- rep(NA, p)                                                     #create a vector of f_statistics for each k tested
   meanShift <- rep(NA, p)                                                 #create a vector with the evaluated size of the intercept difference
@@ -47,13 +47,19 @@ main <- function(Y                                      #Y is a matrix or vector
 
   for(k in startInd:endInd)                                               #loop over the k with a trimming date / burn period
   {
-    print(k)
-    GexB[1:((k - 1)* nEq),] <- 0                                               #force filling the GexB matrix with 0 before and original values after k
+    if(k%%10==0)
+      print(paste0("The iteration is at the level k = ", k))            #get an idea of where we are in the loop every 10 iterations
+    
+    
+    GexB <- Gex %*% t(S)
+    GexB[1:((k - 1) * (nEq)),] <- 0                                       #force filling the GexB matrix with 0 before and original values after k
 
     Z <- t(cbind(Gex, GexB))                                              #bind the regressor and breaking regressor matrices together
 
     lbetaSigma <- compute_beta(Z, Yex, nEq, p, estMode, iter)             #compute the BetaSigma object list
-
+    
+    # lbetaSigma <- compute_beta_one(Z, Yex, nEq, p, estMode, iter)
+    
     Beta <- lbetaSigma$Beta                                               #get the vector of betas
     Sigma <- lbetaSigma$Sigma                                             #get the covariance matrix of errors
     pBeta <- length(Beta)                                                 #get the length of the vector of betas
@@ -73,21 +79,40 @@ main <- function(Y                                      #Y is a matrix or vector
     }
 
     fstat[k] <- compute_fstat(R, Beta, Z, p, Sigma)                      #compute the F-statistic for the current k
-    CI[k, ] <- compute_ci(G, S, Sigma, R, Beta, cv, p)                    #compute the confidence interval for the current k
+    CI[k, ] <- compute_ci(G, S, Sigma, R, Beta, cv, p)                   #compute the confidence interval for the current k
 
-    # meanShift[k] <-  mean(Y[k:p, ], na.rm = T) - mean(Y[1: (k - 1), ], na.rm = T)
-    meanShift[k] <- mean(R%*%Beta)                                        #get the mean intercept shift
+    meanShift[k] <- mean(R%*%Beta)                                       #get the mean intercept shift
   }
 
-  # dev.new()
-  # plot(meanShift, t = 'l')
-
-  if(posBreak)                                                            #if posBreak is TRUE, limit to positive break detection
+  if(posBreak)                                                           #if posBreak is TRUE, limit to positive break detection
     fstat[meanShift < 0] <- 0
 
-  dev.new()
+  # dev.new()
   plot(fstat)
-  print(CI)
 
-  compute_plot_stats(myDates, myVars, fstat, CI, Y, meanShift)
+  g1 <- compute_plot_stats(myDates, myVars, fstat, CI, Y)
+  
+  breakInd <- which.max(fstat)
+  breakDate <- myDates[breakInd]
+  breakCi <- CI[breakInd, ]
+  rownames(Y) <- myDates
+  Gt <- t(G)
+  rownames(Gt) <- myDates
+  meanShift <- meanShift[breakInd]
+  maxF = max(fstat, na.rm=T)
+  trimDates = matrix(data=c(myDates[startInd], myDates[endInd]),nrow = 1, ncol = 2)
+  colnames(trimDates) <- c("begin trim date", "end trim date")
+  
+  return(list(fstat = fstat
+              , maxF = maxF
+              , confInterval = breakCi
+              , criticalValues = cv
+              , breakDate = breakDate
+              , Y = data.frame(Y)
+              , G = data.frame(Gt)
+              , breakInd = breakInd
+              , meanShift = meanShift
+              , aicbic = qOpt
+              , g1 = g1
+              , trimDates = trimDates))
 }
