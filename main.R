@@ -7,7 +7,7 @@ main <- function(Y                                      #Y is a matrix or vector
                  , ci = c(0.9, 0.95, 0.99)              #ci is the vector of confidence intervals (in growing order) to compute based on the CDF of a V distr.
                  , estMode = "OLS"                      #estMode can take values of "OLS", "FGLS", "IGLS"
                  , iter = 3                             #in the case of "IGLS", the number of iteration "iter" can be specified.
-                 , aicbicMode = "AIC"                   #AicbicMode can be "AIC" or "BIC" depending on the maximum criterion to select
+                 , aicbicMode = "AIC"                   #AicbicMode can be "AIC" or "BIC" depending on the minimum criterion to select
                  , qMax = 6                             #qMax is the number of lags (from 1 to qMax) tested to determine the AIC / BIC maximum.
                  , trim = 0.15                          #trim is the percentage parameter to start and end the sample analysis
                  , posBreak = FALSE                     #if we want the algorithm to only detect positive breaks
@@ -15,7 +15,7 @@ main <- function(Y                                      #Y is a matrix or vector
 {
   myVars <- colnames(Y)                                                   #get the variable names
 
-  qOpt <- compute_aicbic(Y, qMax, X, trend, intercept)                    #return the AIC and BIC criteria for lags from 1 to 6
+  qOpt <- compute_aicbic(Y, qMax, X, trend, intercept)                    #return the AIC and BIC criteria for lags from 1 to qMax
   
   
   print(qOpt)                                                             #print the matrix of AIC and BIC for each lags

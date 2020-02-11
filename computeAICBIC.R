@@ -1,4 +1,4 @@
-compute_aicbic <- function(Y, qMax, X, trend, intercept)                   #compute the AIC and BIC criteria for lags from 1 to 6
+compute_aicbic <- function(Y, qMax, X, trend, intercept)           #compute the AIC and BIC criteria for lags from 1 to qMax
 {
   library(stats)                                                   #load stats package
   AICBIC = matrix(data <- NA, nrow = 2, ncol = qMax)               #create empty matrix for the AIC / BIC criteria
