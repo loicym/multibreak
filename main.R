@@ -20,8 +20,8 @@ main <- function(Y                                      #Y is a matrix or vector
   
   print(qOpt)                                                             #print the matrix of AIC and BIC for each lags
 
-  q <- as.numeric(which.max(qOpt[aicbicMode,]))                           #choose the lag q according to the max AIC
-  print(paste0("lag with the maximum ", aicbicMode, " is: ", q))
+  q <- as.numeric(which.min(qOpt[aicbicMode,]))                           #choose the lag q according to the min AIC
+  print(paste0("lag with the minimum ", aicbicMode, " is: ", q))
 
   lconf <- matrix_conformation(Y, q, X, trend, intercept)                 #create a list of conform objects for the estimation
 
