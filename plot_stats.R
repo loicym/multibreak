@@ -46,7 +46,7 @@ PlotStats <- function(my.dates
   g1 <- ggplot(mat.y, aes(x = Date, y = value, group = Variables, colour = Variables))
   g1 <- g1  + geom_line()
   
-  g1 <- g1 + ggtitle("") + xlab("Date") + ylab("Index investment (%)")
+  g1 <- g1 + ggtitle("") + xlab("Date") + ylab("Variable level")
 
   g1 <- g1 + scale_y_continuous(expand = c(0,0))                                                    #force the y axis to start at zero
   
@@ -61,7 +61,7 @@ PlotStats <- function(my.dates
   g1 <- g1 + annotate("rect", xmin = start.date99, xmax = end.date99, ymin = -Inf, ymax = Inf,
                     alpha = .2)
   
-  d <- data.frame(date = my.dates[max.f], event = "index investment break")
+  d <- data.frame(date = my.dates[max.f], event = "Break")
   print(d)
   
   g1 <- g1 + geom_vline(data = d, mapping = aes(xintercept = date), color = "black", size = 1)      #add the break line
